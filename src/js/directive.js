@@ -317,7 +317,6 @@
 						// Process image
 						//var img = new Image();
 						return $http.get(imgObj.url).then(function () {
-							console.log('Got image success!', imgObj.url);
 							// Hide loder
 							if (!imgObj.hasOwnProperty('cached')) scope._hideLoader();
 
@@ -326,7 +325,6 @@
 
 							return imgObj;
 						}, function () {
-							console.log('Error loading image yo!!!!!!!!', imgObj.url);
 							if (!imgObj.hasOwnProperty('cached')) scope._hideLoader();
 							return 'Error when loading img';
 						});
