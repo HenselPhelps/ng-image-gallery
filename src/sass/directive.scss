@@ -166,7 +166,7 @@
 				}
 
 				.delete-img:before{
-					background-image:url(../res/icons/delete.svg);
+					background-image:url(../images/icons/delete.svg);
 				}
 			}
 
@@ -210,11 +210,11 @@
 				}
 
 				.ext-url:before{
-					background-image:url(../res/icons/external-link.svg);
+					background-image:url(../images/icons/external-link.svg);
 				}
 
 				.close:before{
-					background-image:url(../res/icons/close.svg);
+					background-image:url(../images/icons/close.svg);
 				}
 			}
 
@@ -245,12 +245,12 @@
 
 			.prev{
 				left: 0px;
-				background-image:url(../res/icons/prev.svg);
+				background-image:url(../images/icons/prev.svg);
 			}
 
 			.next{
 				right: 0px;
-				background-image:url(../res/icons/next.svg);
+				background-image:url(../images/icons/next.svg);
 			}
 
 			.galleria{
@@ -638,7 +638,7 @@
 						margin:0;
 
 						&:before{
-							background-image:url(../res/icons/delete-inline.svg);
+							background-image:url(../images/icons/delete-inline.svg);
 						}
 					}
 				}
@@ -650,17 +650,17 @@
 						margin:0;
 
 						&:before{
-							background-image:url(../res/icons/external-link-inline.svg);
+							background-image:url(../images/icons/external-link-inline.svg);
 						}
 					}
 				}
 
 				.prev{
-					background-image:url(../res/icons/prev-inline.svg);
+					background-image:url(../images/icons/prev-inline.svg);
 				}
 
 				.next{
-					background-image:url(../res/icons/next-inline.svg);
+					background-image:url(../images/icons/next-inline.svg);
 				}
 
 				.prev, .next{
