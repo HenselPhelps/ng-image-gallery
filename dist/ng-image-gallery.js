@@ -1,5 +1,5 @@
- (function(){
-	'use strict';
+(function(){
+'use strict';
 
 	// Key codes
 	var keys = {
@@ -10,7 +10,7 @@
 	};
 
 	angular
-	.module('thatisuday.ng-image-gallery', ['ngAnimate'])
+	.module('thatisuday.ng-image-gallery', ['ngAnimate', 'athenaHttpSrc'])
 	.provider('ngImageGalleryOpts', function(){
 		var defOpts = {
 			thumbnails  	:   true,
@@ -35,14 +35,14 @@
 		}
 	})
 	.filter('ngImageGalleryTrust', ['$sce', function($sce) {
-      return function(value, type) {
-        // Defaults to treating trusted value as `html`
-        return $sce.trustAs(type || 'html', value);
-      }
-    }])
-    .directive('ngRightClick', ['$parse', function($parse){
-	    return {
-	    	restrict: "A",
+		return function(value, type) {
+		// Defaults to treating trusted value as `html`
+		return $sce.trustAs(type || 'html', value);
+		}
+	}])
+	.directive('ngRightClick', ['$parse', function($parse){
+		return {
+			restrict: "A",
 			scope : false,
 			link : function(scope, element, attrs){
 				element.bind('contextmenu', function(event){
@@ -52,7 +52,7 @@
 					}
 				});
 			}
-	    };
+		};
 	}])
 	.directive("showImageAsync", [function(){
 		return {
@@ -164,8 +164,8 @@
 			}
 		};
 	}])
-	.directive('ngImageGallery', ['$rootScope', '$timeout', '$q', 'ngImageGalleryOpts',
-	function($rootScope, $timeout, $q, ngImageGalleryOpts){
+	.directive('ngImageGallery', ['$rootScope', '$timeout', '$q', 'ngImageGalleryOpts', '$http',
+	function($rootScope, $timeout, $q, ngImageGalleryOpts, $http){
 		return {
 			replace : true,
 			transclude : false,
@@ -195,10 +195,10 @@
 							// Thumbnails container
 							//  Hide for inline gallery
 							'<div ng-if="thumbnails && !inline" class="ng-image-gallery-thumbnails">' +
- 								'<div class="thumb" ng-repeat="image in images track by image.url" ng-click="methods.open($index);" show-image-async="{{image.thumbUrl || image.url}}" async-kind="thumb" ng-style="{\'width\' : thumbSize+\'px\', \'height\' : thumbSize+\'px\'}">'+
- 									'<div class="loader"></div>'+
- 								'</div>' +
- 							'</div>' +
+								'<div class="thumb" ng-repeat="image in images track by image.url" ng-click="methods.open($index);" show-image-async="{{image.thumbUrl || image.url}}" async-kind="thumb" ng-style="{\'width\' : thumbSize+\'px\', \'height\' : thumbSize+\'px\'}">'+
+									'<div class="loader"></div>'+
+								'</div>' +
+							'</div>' +
 
 							// Modal container
 							// (inline container for inline modal)
@@ -237,7 +237,7 @@
 
 										// Images container
 										'<div class="galleria-images img-anim-{{imgAnim}} img-move-dir-{{_imgMoveDirection}}">'+
-											'<img class="galleria-image" ng-right-click ng-repeat="image in images track by image.id" ng-if="_activeImg == image" ng-src="{{image.url}}" ondragstart="return false;" ng-attr-alt="{{image.alt || undefined}}"/>'+
+											'<img class="galleria-image" ng-right-click ng-repeat="image in images track by image.id" ng-if="_activeImg == image" athena-http-src="{{image.url}}" ondragstart="return false;" ng-attr-alt="{{image.alt || undefined}}"/>'+
 										'</div>'+
 
 										// Image description container
@@ -258,7 +258,7 @@
 										// Image bubble navigation container
 										'<div class="galleria-bubbles-wrapper" ng-if="bubbles && imgBubbles" ng-hide="images.length == 1" ng-style="{\'height\' : bubbleSize+\'px\'}" bubble-auto-fit>'+
 											'<div class="galleria-bubbles" bubble-auto-scroll ng-style="{\'margin-left\': _bubblesContainerMarginLeft}">'+
-												'<span class="galleria-bubble img-bubble" ng-click="_setActiveImg(image);" ng-repeat="image in images track by image.id" ng-class="{active : (_activeImg == image)}" show-image-async="{{image.bubbleUrl || image.thumbUrl || image.url}}" async-kind="bubble" ng-style="{\'width\' : bubbleSize+\'px\', \'height\' : bubbleSize+\'px\', \'border-width\' : bubbleSize/10+\'px\', margin: _bubbleMargin}"></span>'+
+												'<span class="galleria-bubble img-bubble" ng-click="_setActiveImg(image);" ng-repeat="image in images track by image.id" ng-class="{active : (_activeImg == image)}" show-image-async="{{image.bubbleUrl || image.thumbnailUrl || image.url}}" async-kind="bubble" ng-style="{\'width\' : bubbleSize+\'px\', \'height\' : bubbleSize+\'px\', \'border-width\' : bubbleSize/10+\'px\', margin: _bubbleMargin}"></span>'+
 											'</div>'+
 										'</div>'+
 
@@ -289,7 +289,7 @@
 				pre : function(scope, elem, attr){
 
 					/*
-					 *	Operational functions
+						*	Operational functions
 					**/
 
 					// Show gallery loader
@@ -315,24 +315,38 @@
 						if(!imgObj.hasOwnProperty('cached')) scope._showLoader();
 
 						// Process image
-						var img = new Image();
-						img.src = imgObj.url;
-						img.onload = function(){
+						//var img = new Image();
+						return $http.get(imgObj.url).then(function () {
+							console.log('Got image success!', imgObj.url);
 							// Hide loder
-							if(!imgObj.hasOwnProperty('cached')) scope._hideLoader();
+							if (!imgObj.hasOwnProperty('cached')) scope._hideLoader();
 
 							// Cache image
-							if(!imgObj.hasOwnProperty('cached')) imgObj.cached = true;
+							if (!imgObj.hasOwnProperty('cached')) imgObj.cached = true;
 
-							deferred.resolve(imgObj);
-						}
-						img.onerror = function(){
-							if(!imgObj.hasOwnProperty('cached')) scope._hideLoader();
+							return imgObj;
+						}, function () {
+							console.log('Error loading image yo!!!!!!!!', imgObj.url);
+							if (!imgObj.hasOwnProperty('cached')) scope._hideLoader();
+							return 'Error when loading img';
+						});
+						//img.src = imgObj.url;
+						//img.onload = function(){
+						//	// Hide loder
+						//	if(!imgObj.hasOwnProperty('cached')) scope._hideLoader();
 
-							deferred.reject('Error when loading img');
-						}
+						//	// Cache image
+						//	if(!imgObj.hasOwnProperty('cached')) imgObj.cached = true;
 
-						return deferred.promise;
+						//	deferred.resolve(imgObj);
+						//}
+						//img.onerror = function(){
+						//	if(!imgObj.hasOwnProperty('cached')) scope._hideLoader();
+
+						//	deferred.reject('Error when loading img');
+						//}
+
+						//return deferred.promise;
 					}
 
 					scope._setActiveImg = function(imgObj){
@@ -393,7 +407,7 @@
 
 
 					/*
-					 *	Gallery settings
+						*	Gallery settings
 					**/
 
 					// Modify scope models
@@ -456,7 +470,7 @@
 
 
 					/*
-					 *	Methods
+						*	Methods
 					**/
 
 					// Open gallery modal
@@ -540,7 +554,7 @@
 
 
 					/*
-					 *	User interactions
+						*	User interactions
 					**/
 
 					// Key events
@@ -592,7 +606,7 @@
 
 
 					/*
-					 *	Actions on angular events
+						*	Actions on angular events
 					**/
 
 					var removeClassFromDocumentBody = function(){
@@ -606,4 +620,4 @@
 			}
 		}
 	}]);
- })();
+})();
